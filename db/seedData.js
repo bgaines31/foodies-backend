@@ -62,18 +62,21 @@ const users = [
     username: 'Brianna',
     name: 'Brianna Gaines',
     password: 'briannagaines',
+    passwordNoJWT: 'briannagaines',
     email: 'brianna1@gmail.com',
   },
   {
     username: 'Lola',
     name: 'Lola Gorgeous',
     password: 'iamgorgeous',
+    passwordNoJWT: 'iamgorgeous',
     email: 'iamgorgeous1@gmail.com',
   },
   {
     username: 'Hana',
     name: 'Hana Jane',
     password: 'iwillfightyou',
+    passwordNoJWT: 'iwillfightyou',
     email: 'iwillfightyou1@gmail.com',
   },
 ];

@@ -1,7 +1,6 @@
 {
   "name": "foodies-backend",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -25,5 +24,14 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bgaines31/foodies-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bgaines31/foodies-backend/issues"
+  },
+  "homepage": "https://github.com/bgaines31/foodies-backend#readme",
+  "description": ""
 }

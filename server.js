@@ -5,76 +5,64 @@ const { User, Recipe } = require('./db');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const morgan = require('morgan');
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET, PORT } = process.env;
 
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-app.use(morgan('dev'));
 
-// app.get('/', async (req, res, next) => {
-//   try {
-//     res.send('<h1>Welcome to Loginopolis!</h1><p>Log in via POST /login or register via POST /register</p>');
-//   } catch (error) {
-//     console.error(error);
-//     next(error)
-//   }
-// });
-const createUser = async ({ firstName , lastName, email , password }) => {
-    return await User.create({ firstName , lastName,  email , password });
+const setUser = (req, res, next) => {
+  try {
+    const auth = req.header('Authorization');
+    if (!auth) {
+      next();
+    } else {
+      const [, token] = auth.split(' ');
+      const payload = jwt.verify(token, JWT_SECRET);
+      req.user = payload;
+      next();
+    }
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(401);
+    next(error);
+  }
 };
 
-app.post("/register", async (req, res, next) => {
+//SIGN UP -- DONE
+app.post('/signup', async (req, res, next) => {
   const hashPassword = async (password) => {
     const hash = await bcrypt.hash(password, 10);
     return hash;
-}
+  };
   try {
-    const {username, password} = req.body;
+    const { username, password, name, email, passwordNoJWT } =
+      req.body;
     const hashedPassword = await hashPassword(password, 10);
-    const user = await User.create({username, password:hashedPassword});
-    // res.send("successfully created user " + user.username);
-    const token = jwt.sign({ username, id: user.id }, process.env.JWT_SECRET);
-    res.send({message: 'success', token: token });
-  } catch(error) {
+    const user = await User.create({
+      username,
+      password: hashedPassword,
+      name,
+      email,
+      passwordNoJWT,
+    });
+    const token = jwt.sign({ username, id: user.id }, JWT_SECRET);
+    res.send({
+      message: 'successfully created user ' + user.username,
+      token: token,
+    });
+  } catch (error) {
     console.error(error);
     next(error);
   }
-})
+});
 
-
-// router.post('/login', async function(req, res, next) { 
-//     const { email, password } = req.body;
-//     if (email && password) {
-//         let user = await getUser({ email: email });
-//         if (!user) {
-//           return  res.status(401).json({ message: 'No such user found' });
-//         }
-//         bcrypt.compare( password , user.password, (err, result) =>{
-//             if(err){
-//                  res.status(403).json({message :'incorrect password'});
-//             }
-//             if(result){
-//                 let payload = { user   };
-//                 console.log(jwtOptions.secretOrKey);
-//                 let token = jwt.sign(payload, jwtOptions.secretOrKey);
-//                return res.status(200).json({ message: 'ok', token });
-//             }
-//             else{
-//               return  res.status(403).json({message :'incorrect password'});
-//             }
-
-//         })
-
-//     }
-// });
-
-// POST /login
+// LOGIN -- DONE
 app.post('/login', async (req, res, next) => {
-
-    try {
-        const { username, password } = req.body;
-const user = await User.findOne({ where: { username } });
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ where: { username } });
     if (!user) {
       res.sendStatus(401);
     } else {
@@ -82,45 +70,122 @@ const user = await User.findOne({ where: { username } });
       if (!match) {
         res.sendStatus(401);
       } else {
-        const token = jwt.sign({ username, id: user.id }, process.env.JWT_SECRET);
-        res.send({message: "success", token: token});
+        const token = jwt.sign({ username, id: user.id }, JWT_SECRET);
+        res.send({
+          message: 'successfully logged in ' + user.name,
+          token: token,
+        });
       }
     }
-    } catch (error) {
-        console.log(error);
-        next(error);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+// READ ALL -- DONE with JWT
+app.get('/recipes', setUser, async (req, res, next) => {
+  try {
+    if (!req.user) {
+      res.sendStatus(401);
+    } else {
+      res.send(await Recipe.findAll());
+      console.log(req.user);
     }
-
-})
-
-app.get("/recipes", async (req, res, next)=>{
-    try{
-        res.send(await Recipe.findAll())
-    }catch(error) {
+  } catch (error) {
     console.error(error);
     next(error);
   }
-})
-app.get("/users", async (req, res, next)=>{
-    try{
-        allUsers = await User.findAll()
-        res.send(allUsers)
-    }catch(error) {
+});
+
+// READ ONE -- DONE with JWT
+app.get('/recipes/:id', setUser, async (req, res, next) => {
+  try {
+    let recipe = await Recipe.findByPk(req.params.id);
+    if (!req.user) {
+      res.sendStatus(401);
+    } else if (recipe.ownerId != req.user.id) {
+      console.log(req.body.ownerId);
+      console.log(req.user.id);
+      res.sendStatus(401);
+    } else {
+      res.send(recipe);
+    }
+  } catch (error) {
     console.error(error);
     next(error);
   }
-})
+});
 
-app.get("/recipes/:id", async(req, res) => {
-    const userId = await Recipe.findAll({where: {ownerId: req.params.id}})
-    // let oneRecipe = await Recipe.findByPk(req.params.id, {where:{ ownerId: User.userId
+// app.get('/users', async (req, res, next) => {
+//   try {
+//     allUsers = await User.findAll();
+//     res.send(allUsers);
+//   } catch (error) {
+//     console.error(error);
+//     next(error);
+//   }
+// });
 
-    // }})
-    res.send(userId)
-  })
+// NEW RECIPE -- DONE with JWT
+app.post('/recipes', setUser, async (req, res) => {
+  if (!req.user) {
+    res.sendStatus(401);
+  } else {
+    const { title, meal, ingredients, directions, cookTime } =
+      req.body;
+    await Recipe.create({
+      title,
+      meal,
+      ingredients,
+      directions,
+      cookTime,
+      ownerId: req.user.id,
+    });
+    res.json(await Recipe.findAll());
+  }
+});
 
-app.listen(process.env.PORT, () => {
-    console.log(`Recipes are ready at http://localhost:${process.env.PORT}`);
-  });
-  
+// DELETE -- DONE with JWT
+app.delete('/recipes/:id', setUser, async (req, res) => {
+  let recipe = await Recipe.findByPk(req.params.id);
+  if (!req.user) {
+    res.sendStatus(401);
+  } else if (recipe.ownerId != req.user.id) {
+    console.log(req.body.ownerId);
+    console.log(req.user.id);
+    res
+      .status(401)
+      .send("this is not your recipe to delete! don't be rude!");
+  } else {
+    let deletedRecipe = await Recipe.destroy({
+      where: { id: req.params.id },
+    });
+    res.send(await Recipe.findAll());
+  }
+});
+
+// UPDATE -- DONE with JWT
+app.put('/recipes/:id', setUser, async (req, res) => {
+  let recipe = await Recipe.findByPk(req.params.id);
+  if (!req.user) {
+    res.sendStatus(401);
+  } else if (recipe.ownerId != req.user.id) {
+    console.log(req.body.ownerId);
+    console.log(req.user.id);
+    res
+      .status(401)
+      .send(
+        'this is not your recipe to update! stop trying to control everything!'
+      );
+  } else {
+    await Recipe.update(req.body, { where: { id: req.params.id } });
+    res.send(await Recipe.findAll());
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Recipes are ready at http://localhost:${PORT}`);
+});
+
 module.exports = app;

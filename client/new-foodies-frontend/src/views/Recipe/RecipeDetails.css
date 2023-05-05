@@ -1,0 +1,29 @@
+.recipeTitle{
+  letter-spacing: 5px;
+  text-transform: uppercase;
+}
+
+.btnClass{
+  min-height: 50px;
+  max-height: 50px;
+  min-width: 50px;
+  max-width: 50px;
+}
+
+.instructions{
+  padding-bottom: 7px;
+}
+
+.cookTime{
+  padding-top: 10px;
+  margin-bottom: 2px;
+}
+.serving{
+  font-size: large;
+  margin-top: 0;
+}
+
+.instructions{
+  margin-right: 80px;
+  padding-right: 50px;
+}

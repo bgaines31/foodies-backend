@@ -1,0 +1,10 @@
+body{
+    background-image: url("../../images/Home.png") ;
+    background-size: cover;
+}
+
+.register-btn{
+    background-color: #2e4732 !important;
+    border: none;
+    color: white !important;
+}

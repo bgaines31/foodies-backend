@@ -6,3 +6,5 @@ node_modules/
 dist
 .cache
 *.sqlite
+
+api_key.js

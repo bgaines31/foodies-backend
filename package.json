@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "node db/seed.js",
+    "seed": "node server/db/seed.js",
     "start": "node server.js",
     "start-dev": "nodemon server.js"
   },
@@ -19,6 +19,8 @@
     "express-openid-connect": "^2.14.0",
     "jsonwebtoken": "^9.0.0",
     "morgan": "^1.10.0",
+    "react-router": "^6.11.1",
+    "react-router-dom": "^6.11.1",
     "sequelize": "^6.31.0",
     "sqlite3": "^5.1.6"
   },

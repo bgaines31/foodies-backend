@@ -117,15 +117,15 @@ app.get('/recipes/:id', setUser, async (req, res, next) => {
   }
 });
 
-// app.get('/users', async (req, res, next) => {
-//   try {
-//     allUsers = await User.findAll();
-//     res.send(allUsers);
-//   } catch (error) {
-//     console.error(error);
-//     next(error);
-//   }
-// });
+app.get('/users', async (req, res, next) => {
+  try {
+    allUsers = await User.findAll();
+    res.send(allUsers);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
 
 // NEW RECIPE -- DONE with JWT
 app.post('/recipes', setUser, async (req, res) => {
